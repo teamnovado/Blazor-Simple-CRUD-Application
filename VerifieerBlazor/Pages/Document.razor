@@ -1,0 +1,127 @@
+﻿@page "/Document"
+@page "/Document/{Id:int}"
+
+@using SharedLibrary.Models
+@using VerifieerBlazor.Components
+@using Businesslayer.Services
+
+@inject IDocumentService DocumentService
+@inject NavigationManager NavigationManager;
+@inject IJSRuntime JSRuntime
+
+<h1>@(Id == 0 ? "New Document" : "Document " + Doc.Id)</h1>
+
+@if (Id > 0 && !IsEditMode)
+{
+    <div class="row">
+        <div class="col-2">
+            Title
+        </div>
+        <div class="col">
+            @Doc.Title
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            Description
+        </div>
+        <div class="col">
+            @Doc.Description
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            Created
+        </div>
+        <div class="col">
+            @Doc.Created
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            Last Modified
+        </div>
+        <div class="col">
+            @Doc.LastModified
+        </div>
+    </div>
+
+}
+else
+{
+    <EditForm Model="Doc" OnValidSubmit="() => CreateOrUpdateDocument()">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row">
+            <div class="col-2">
+                Title:
+            </div>
+            <div class="col">
+                <InputText id="description" @bind-Value="Doc.Title" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2">
+                Description:
+            </div>
+            <div class="col">
+                <InputTextArea id="description" @bind-Value="Doc.Description" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+}
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public bool IsEditMode { get; set; }
+
+    private DocumentModel Doc { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsEditMode = GetQueryParm("edit") == "1";
+
+        Doc = Id == 0 ? new DocumentModel() : await DocumentService.Get(Id);
+
+        if (Doc == null)
+            NavigationManager.NavigateTo("NotFound");
+    }
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeAsync<object>("webviewerFunctions.initWebViewer");
+        }
+    }
+
+    async Task CreateOrUpdateDocument()
+    {
+        if (Id == 0)
+        {
+            await DocumentService.Create(Doc);
+        }
+        else
+        {
+            await DocumentService.Update(Doc, Id);
+        }
+
+        NavigationManager.NavigateTo("Overview");
+    }
+
+    string GetQueryParm(string parmName)
+    {
+        var uriBuilder = new UriBuilder(NavigationManager.Uri);
+        var q = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+        return q[parmName] ?? "";
+    }
+}

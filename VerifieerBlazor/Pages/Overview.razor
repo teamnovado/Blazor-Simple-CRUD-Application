@@ -1,0 +1,102 @@
+﻿@page "/Overview"
+
+
+@using SharedLibrary.Models
+@using VerifieerBlazor.Components
+@using Businesslayer.Services
+@using Microsoft.JSInterop
+
+@inject IDocumentService DocumentService
+@inject NavigationManager NavigationManager
+
+<h1>Documents</h1>
+<div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Created</th>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var document in Documents)
+            {
+                <DocumentRecord Document="document"
+                                OnDelete="async () => ConfirmDelete(document)" />
+            }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-primary" @onclick="() => CreateDocument()">Create Document</button>
+</div>
+
+@if (ShowModal)
+{
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirm delete</h4>
+                    <button type="button" class="close" @onclick="() => CloseModal()">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    Are you sure you want to delete <b>@DocumentToDelete.Title</b>?
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" @onclick="() => CloseModal()">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteDocument()">Delete</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    List<DocumentModel> Documents = new List<DocumentModel>();
+    private DocumentModel DocumentToDelete { get; set; }
+
+    public bool ShowModal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Documents = await DocumentService.Get();
+    }
+
+    protected async void ConfirmDelete(DocumentModel doc)
+    {
+        DocumentToDelete = doc;
+        ShowModal = true;
+
+        // Notifying component that state has changed
+        StateHasChanged();
+    }
+
+    protected async void CloseModal()
+    {
+        DocumentToDelete = null;
+        ShowModal = false;
+    }
+
+    protected async Task DeleteDocument()
+    {
+        await DocumentService.Delete(DocumentToDelete.Id);
+        Documents.Remove(DocumentToDelete);
+        CloseModal();
+    }
+
+    async Task CreateDocument()
+    {
+        NavigationManager.NavigateTo("Document");
+    }
+}

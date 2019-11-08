@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>SharedLibrary</AssemblyName>
+    <RootNamespace>SharedLibrary</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Datalayer\Datalayer.csproj" />
+  </ItemGroup>
+
+</Project>

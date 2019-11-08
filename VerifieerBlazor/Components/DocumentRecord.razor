@@ -1,0 +1,37 @@
+﻿
+@using SharedLibrary.Models
+@using Businesslayer.Services
+
+@inject IDocumentService DocumentService
+@inject NavigationManager NavigationManager
+
+<tr>
+    <td>@Document.Created</td>
+    <td class="document__link" @onclick="() => OpenDocument(Document.Id)">@Document.Title</td>
+    <td>@Document.Description</td>
+    <td @onclick="() => EditDocument(Document.Id)"><i class="fas fa-edit document__edit"></i></td>
+    <td @onclick="() => DeleteDocument(Document.Id)"><i class="fas fa-trash-alt document__trash"></i></td>
+</tr>
+
+@code {
+    [Parameter]
+    public DocumentModel Document { get; set; }
+
+    [Parameter]
+    public Action OnDelete { get; set; }
+
+    void OpenDocument(int id)
+    {
+        NavigationManager.NavigateTo($"/Document/{id}");
+    }
+
+    void EditDocument(int id)
+    {
+        NavigationManager.NavigateTo($"/Document/{id}?edit=1");
+    }
+
+    void DeleteDocument(int id)
+    {
+        OnDelete.Invoke();
+    }
+}
