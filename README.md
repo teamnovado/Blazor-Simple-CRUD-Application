@@ -22,3 +22,5 @@ Specific to Blazor the application includes samples of the following features:
 
 ## How to run
 Everything you need is included in the repository. The data is stored in an SQLite DB, which is also included. Simply clone and run to get started.
+
+More info: https://www.novado.be/insights/innovationlab-1-alles-over-net-core-3-c-8-0-webassembly-blazor/
